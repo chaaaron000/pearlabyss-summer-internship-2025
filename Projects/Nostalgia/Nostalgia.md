@@ -306,7 +306,7 @@ public abstract class ConsumableItemSO : ScriptableObject
 
 > 일기장 관리, UI 로직까지 모두 하나의 스크립트에서 작성되어 있던 것을 기능별로 분리하여 이해하기 쉽도록 하였습니다.
 
-🔍 [일기장 코드 보기]()
+🔍 [일기장 코드 보기](./Diary/)
 
 <br />
 
