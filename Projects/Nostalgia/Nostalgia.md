@@ -312,4 +312,4 @@ public abstract class ConsumableItemSO : ScriptableObject
 
 ---
 
-🏠 [메인 페이지로 돌아가기](../READMD.md)
+🏠 [메인 페이지로 돌아가기](../../README.md)
