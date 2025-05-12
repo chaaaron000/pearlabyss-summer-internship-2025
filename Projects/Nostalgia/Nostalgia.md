@@ -8,37 +8,43 @@
 
 > 유저의 세팅을 UI에서 조절하고, 게임을 다시 실행했을 때 자동으로 값을 불러올 수 있도록 Scriptable Object를 사용하여 만들었습니다.
 
-- SettingsSO.cs
+<details>
+    <summary>
+        SettingsSO.cs
+    </summary>
+    
 ```csharp
-    public abstract class SettingsSO : ScriptableObject
+public abstract class SettingsSO : ScriptableObject
+{
+    public virtual void Load()
     {
-        public virtual void Load()
+        string path = GetSavePath();
+        
+        if (!File.Exists(path))
         {
-            string path = GetSavePath();
-            
-            if (!File.Exists(path))
-            {
-                Save();
-                return;
-            }
-
-            string json = File.ReadAllText(path);
-            JsonUtility.FromJsonOverwrite(json, this);
+            Save();
+            return;
         }
 
-        protected void Save()
-        {
-            string path = GetSavePath();
-            string json = JsonUtility.ToJson(this, true);
-            File.WriteAllText(path, json);
-        }
-
-        private string GetSavePath()
-        {
-            return Path.Combine(Application.persistentDataPath, $"{name}.json");
-        }
+        string json = File.ReadAllText(path);
+        JsonUtility.FromJsonOverwrite(json, this);
     }
+
+    protected void Save()
+    {
+        string path = GetSavePath();
+        string json = JsonUtility.ToJson(this, true);
+        File.WriteAllText(path, json);
+    }
+
+    private string GetSavePath()
+    {
+        return Path.Combine(Application.persistentDataPath, $"{name}.json");
+    }
+}
 ```
+
+</details>
 
 🔍 [유저 세팅 기능 및 UI 구현 코드 더 보기]()
 
@@ -48,7 +54,10 @@
 
 > 기존의 코루틴 방식으로 작동하던 몹 코드를 Fusion에서 제공하는 FSM을 사용하여 리펙토링 하였습니다.
 
-- SadAI.cs
+<details>
+    <summary>
+        SadAI.cs
+    </summary>
 
 ```csharp
 [RequireComponent(typeof(StateMachineController))]
@@ -170,8 +179,13 @@ public class SadAI : BaseMob, IStateMachineOwner
 }
 
 ```
+    
+</details>
 
-- MobSO.cs
+<details>
+    <summary>
+        ModSO.cs
+    </summary>
 
 ```csharp
 [CreateAssetMenu(fileName = "SO_", menuName = "Scriptable Object/Mob", order = 0)]
@@ -195,6 +209,8 @@ public class MobSO : ScriptableObject
 
 ```
 
+</details>
+
 🔍 [몹 리펙토링 코드 더 보기]()
 
 <br />
@@ -203,56 +219,64 @@ public class MobSO : ScriptableObject
 
 > 기존에는 필드에서 습득할 수 있는 아이템이 클리어 목표 아이템인 일기장 밖에 없었으나, 게임이 루즈해지는 것 같다는 의견이 있었습니다. 따라서 습득하여 사용할 수 있는 아이템을 구현하였습니다.
 
-- ConsumableItem.cs
+<details>
+    <summary>
+        ConsumableItem.cs
+    </summary>
 
 ```csharp
-    [RequireComponent(typeof(NetworkObject), typeof(NetworkTransform), typeof(BoxCollider))]
-    public class ConsumableItem : NetworkBehaviour, IInteractable
+[RequireComponent(typeof(NetworkObject), typeof(NetworkTransform), typeof(BoxCollider))]
+public class ConsumableItem : NetworkBehaviour, IInteractable
+{
+    [Header("Item Scriptable Object")]
+    [SerializeField] private ConsumableItemSO m_itemSO;
+
+    [Header("Interactable Prompt Data")] 
+    [SerializeField] private InteractPromptData m_interactPromptData;
+
+    public void OnInteract(NetworkObject playerObject)
     {
-        [Header("Item Scriptable Object")]
-        [SerializeField] private ConsumableItemSO m_itemSO;
+        Player player = playerObject.GetComponent<Player>();
 
-        [Header("Interactable Prompt Data")] 
-        [SerializeField] private InteractPromptData m_interactPromptData;
-
-        public void OnInteract(NetworkObject playerObject)
-        {
-            Player player = playerObject.GetComponent<Player>();
-
-            Debug.LogWarning("Consumable Item OnInteract");
-           
-            // 플레이어의 현재 인벤토리 용량 확인
-            // 추가 불가능하면 return
-            // 가능하면 AddItem
-            PlayerInventory playerInventory = player.GetComponent<PlayerInventory>();
-            if(playerInventory != null) {
-                if(playerInventory.CanAddItem(m_itemSO)) {
-                    playerInventory.AddItem(m_itemSO);
-                    DespawnRpc();
-                }
-                else {
-                    Debug.Log("아이템을 추가할 수 없습니다.");
-                    return;
-                }
+        Debug.LogWarning("Consumable Item OnInteract");
+       
+        // 플레이어의 현재 인벤토리 용량 확인
+        // 추가 불가능하면 return
+        // 가능하면 AddItem
+        PlayerInventory playerInventory = player.GetComponent<PlayerInventory>();
+        if(playerInventory != null) {
+            if(playerInventory.CanAddItem(m_itemSO)) {
+                playerInventory.AddItem(m_itemSO);
+                DespawnRpc();
             }
- 
+            else {
+                Debug.Log("아이템을 추가할 수 없습니다.");
+                return;
+            }
         }
 
-        public InteractPromptData GetInteractPromptData()
-        {
-            return m_interactPromptData;
-        }
-
-        [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
-        private void DespawnRpc()
-        {
-            Runner.Despawn(GetComponent<NetworkObject>());
-        }
     }
 
-```
+    public InteractPromptData GetInteractPromptData()
+    {
+        return m_interactPromptData;
+    }
 
-- ConsumableItemSO.cs
+    [Rpc(RpcSources.All, RpcTargets.StateAuthority)]
+    private void DespawnRpc()
+    {
+        Runner.Despawn(GetComponent<NetworkObject>());
+    }
+}
+
+```
+    
+</details>
+
+<details>
+    <summary>
+        ConsumableItemSO.cs
+    </summary>
 
 ```csharp
 public abstract class ConsumableItemSO : ScriptableObject
@@ -271,6 +295,8 @@ public abstract class ConsumableItemSO : ScriptableObject
 }
 
 ```
+    
+</details>
 
 🔍 [사용 아이템 코드 더 보기]()
 
@@ -281,6 +307,8 @@ public abstract class ConsumableItemSO : ScriptableObject
 > 일기장 관리, UI 로직까지 모두 하나의 스크립트에서 작성되어 있던 것을 기능별로 분리하여 이해하기 쉽도록 하였습니다.
 
 🔍 [일기장 코드 보기]()
+
+<br />
 
 ---
 
