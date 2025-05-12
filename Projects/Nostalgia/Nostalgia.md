@@ -46,7 +46,7 @@ public abstract class SettingsSO : ScriptableObject
 
 </details>
 
-🔍 [유저 세팅 기능 및 UI 구현 코드 더 보기]()
+🔍 [유저 세팅 기능 및 UI 구현 코드 더 보기](./User%20Settings/)
 
 <br />
 
@@ -211,7 +211,7 @@ public class MobSO : ScriptableObject
 
 </details>
 
-🔍 [몹 리펙토링 코드 더 보기]()
+🔍 [몹 리펙토링 코드 더 보기](./Mob/)
 
 <br />
 
@@ -298,7 +298,7 @@ public abstract class ConsumableItemSO : ScriptableObject
     
 </details>
 
-🔍 [사용 아이템 코드 더 보기]()
+🔍 [사용 아이템 코드 더 보기](./Item/)
 
 <br />
 
